@@ -30,9 +30,9 @@ class MovieController extends Controller
     public function update(Request $request, $id){
         $movie = Movie::findOrFail($id);
         $validated = $request->validate([
-            "title"=> "sometime|string|max:255",
-            "year" => "sometime|integer|min:1950|max:2025",
-            "genre" => "sometime|string|max:255",
+            "title"=> "sometimes|string|max:255",
+            "year" => "sometimes|integer|min:1950|max:2025",
+            "genre" => "sometimes|string|max:255",
         ]);
 
         $movie->update($validated);

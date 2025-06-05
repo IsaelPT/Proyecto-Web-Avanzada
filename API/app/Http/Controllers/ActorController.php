@@ -18,8 +18,8 @@ class ActorController extends Controller
 
     public function store(Request $request){
         $validated = $request->validate([
-            "name"=> "sometime|string|max:255",
-            "age" => "sometime|integer",
+            "name"=> "sometimes|string|max:255",
+            "age" => "sometimes|integer",
         ]);
 
         $product = Actor::create($validated);
