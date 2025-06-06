@@ -1,0 +1,43 @@
+/API/.phpunit.cache
+/API/node_modules
+/API/public/build
+/API/public/hot
+/API/public/storage
+/API/storage/*.key
+/API/vendor
+/API/.env
+/API/.env.backup
+/API/.env.production
+/API/.phpunit.result.cache
+/API/Homestead.json
+/API/Homestead.yaml
+/API/auth.json
+/API/npm-debug.log
+/API/yarn-error.log
+/API/.fleet
+/API/.idea
+/API/.vscode
+
+# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+
+# dependencies
+/fronted/node_modules
+/fronted/.pnp
+/fronted/.pnp.js
+
+# testing
+/fronted/coverage
+
+# production
+/fronted/build
+
+# misc
+/fronted/.DS_Store
+/fronted/.env.local
+/fronted/.env.development.local
+/fronted/.env.test.local
+/fronted/.env.production.local
+
+/fronted/npm-debug.log*
+/fronted/yarn-debug.log*
+/fronted/yarn-error.log*
