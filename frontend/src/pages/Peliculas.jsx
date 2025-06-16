@@ -61,7 +61,7 @@ const Peliculas = () => {
     setSelectedMovie(movie);
     setCurrentPage(1);
   };
-
+  
   return (
     <div className="py-12 px-4 md:px-16 min-h-screen bg-gray-100 dark:bg-gray-900">
       <Hero movie={selectedMovie} onPrev={handlePrev} onNext={handleNext} />

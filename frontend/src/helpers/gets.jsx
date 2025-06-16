@@ -29,3 +29,13 @@ export const getActors = async () => {
     return null;
   }
 };
+
+export const getMovieActorById = async (id) => {
+  try {
+    const response = await axios.get(`http://localhost:8000/api/movies_actors/${id}`);
+    return response.data;
+  } catch (error) {
+    console.error("Error al obtener movie_actor por id:", error);
+    return null;
+  }
+};

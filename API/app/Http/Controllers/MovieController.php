@@ -39,7 +39,8 @@ class MovieController extends Controller
                 $file = $request->file('photo');
                 $photoName = time().'_'.$file->getClientOriginalName();
                 $photoPath = $file->storeAs('movies', $photoName, 'public');
-                $validated['photo_path'] = '/storage/' . $photoPath;
+                // Guardar la ruta relativa para XAMPP
+                $validated['photo_path'] = '/API/public/storage/movies/' . $photoName;
                 $validated['photo_name'] = $photoName;
             }
 
@@ -68,7 +69,8 @@ class MovieController extends Controller
                 $file = $request->file('photo');
                 $photoName = time().'_'.$file->getClientOriginalName();
                 $photoPath = $file->storeAs('movies', $photoName, 'public');
-                $validated['photo_path'] = '/storage/' . $photoPath;
+                // Guardar la ruta relativa para XAMPP
+                $validated['photo_path'] = '/API/public/storage/movies/' . $photoName;
                 $validated['photo_name'] = $photoName;
             }
 

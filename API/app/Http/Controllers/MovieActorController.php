@@ -34,7 +34,25 @@ class MovieActorController extends Controller
 
     public function show($id) {
         try {
-            return MoviesActor::findOrFail($id);
+            $result = DB::table('movies_actors')
+                ->join('movies', 'movies_actors.movie_id', '=', 'movies.id')
+                ->join('actors', 'movies_actors.actor_id', '=', 'actors.id')
+                ->where('movies_actors.id', $id)
+                ->select(
+                    'movies_actors.id',
+                    'movies.title as movie_title',
+                    'movies.genre as movie_genre',
+                    'movies.year as movie_year',
+                    'movies.photo_path as movie_photo_path',
+                    'movies.photo_name as movie_photo_name',
+                    'actors.name as actor_name',
+                    'actors.age as actor_age'
+                )
+                ->first();
+            if (!$result) {
+                return response()->json(['error' => 'No se pudo obtener la relación.'], 404);
+            }
+            return response()->json($result);
         } catch (Exception $e) {
             return response()->json(['error' => 'No se pudo obtener la relación.'], 500);
         }

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { getActors } from '../helpers/gets';
+import { getActors, getMovieActorById } from '../helpers/gets';
 import { createMovie, createMovieActor } from '../helpers/posts';
 
 const CrearPeliculaForm = ({ onCreate, onClose }) => {
@@ -43,7 +43,16 @@ const CrearPeliculaForm = ({ onCreate, onClose }) => {
       const movie = await createMovie(movieFormData);
       // Crear relación en movies_actors
       if (movie && form.actor_id) {
-        await createMovieActor({ movie_id: movie.id, actor_id: form.actor_id });
+        const movieActor = await createMovieActor({ movie_id: movie.id, actor_id: form.actor_id });
+        if (movieActor && movieActor.id) {
+          const movieActorFull = await getMovieActorById(movieActor.id);
+          if (movieActorFull) {
+            onCreate(movieActorFull);
+            onClose();
+            setLoading(false);
+            return;
+          }
+        }
       }
       if (movie) {
         onCreate(movie);
