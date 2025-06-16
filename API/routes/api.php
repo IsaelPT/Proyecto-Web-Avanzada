@@ -23,6 +23,7 @@ Route::get('movies_actors/{id}',[MovieActorController::class,'show']);
 Route::post('movies_actors',[MovieActorController::class,'store']);
 Route::put('movies_actors/{id}',[MovieActorController::class,'update']);
 Route::delete('movies_actors/{id}',[MovieActorController::class,'destroy']);
+Route::get('movies_actors/filter/{theme}',[MovieActorController::class,'filter']);
 
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
