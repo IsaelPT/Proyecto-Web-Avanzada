@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Actor;
+use Exception;
 
 class ActorController extends Controller
 {
@@ -11,7 +12,7 @@ class ActorController extends Controller
     public function index(){
         try {
             return Actor::all();
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             return response()->json(['error' => 'No se pudo obtener la información de los actores.'], 500);
         }
     }
@@ -19,7 +20,7 @@ class ActorController extends Controller
     public function show($id) {
         try {
             return Actor::findOrFail($id);
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             return response()->json(['error' => 'No se pudo obtener el actor.'], 500);
         }
     }
@@ -33,7 +34,7 @@ class ActorController extends Controller
 
             $product = Actor::create($validated);
             return response()->json($product, 201);
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             return response()->json(['error' => 'No se pudo crear el actor.'], 500);
         }
     }
@@ -48,7 +49,7 @@ class ActorController extends Controller
 
             $actor->update($validated);
             return response()->json($actor, 200);
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             return response()->json(['error' => 'No se pudo actualizar el actor.'], 500);
         }
     }
@@ -58,7 +59,7 @@ class ActorController extends Controller
             $actor = Actor::findOrFail($id);
             $actor->delete();
             return response()->json(null, 204);
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             return response()->json(['error' => 'No se pudo eliminar el actor.'], 500);
         }
     }

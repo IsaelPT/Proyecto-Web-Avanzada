@@ -1,34 +1,58 @@
-import React, { useState } from 'react';
-
-// Formulario para crear una nueva película
-const actoresFalsos = [
-  { id: 1, name: 'Actor 1' },
-  { id: 2, name: 'Actor 2' },
-  { id: 3, name: 'Actor 3' },
-];
+import React, { useState, useEffect } from 'react';
+import { getActors } from '../helpers/gets';
+import { createMovie, createMovieActor } from '../helpers/posts';
 
 const CrearPeliculaForm = ({ onCreate, onClose }) => {
   const [form, setForm] = useState({
     title: '',
-    mainActor: '',
-    genre: '',
-    imdbRating: '',
-    duration: '',
     year: '',
-    poster: '',
-    cinema: '',
-    cinemaRating: '',
+    genre: '',
+    photo: null,
+    actor_id: '',
   });
+  const [actores, setActores] = useState([]);
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    const fetchActors = async () => {
+      const data = await getActors();
+      setActores(data || []);
+    };
+    fetchActors();
+  }, []);
 
   const handleChange = e => {
-    setForm({ ...form, [e.target.name]: e.target.value });
+    const { name, value, files } = e.target;
+    if (name === 'photo') {
+      setForm({ ...form, photo: files[0] });
+    } else {
+      setForm({ ...form, [name]: value });
+    }
   };
 
-  const handleSubmit = e => {
+  const handleSubmit = async e => {
     e.preventDefault();
-    if (form.title && form.mainActor && form.genre) {
-      onCreate({ ...form, id: Date.now(), genres: [form.genre] });
-      onClose();
+    setLoading(true);
+    try {
+      // Crear película en movies
+      const movieFormData = new FormData();
+      movieFormData.append('title', form.title);
+      movieFormData.append('year', form.year);
+      movieFormData.append('genre', form.genre);
+      if (form.photo) movieFormData.append('photo', form.photo);
+      const movie = await createMovie(movieFormData);
+      // Crear relación en movies_actors
+      if (movie && form.actor_id) {
+        await createMovieActor({ movie_id: movie.id, actor_id: form.actor_id });
+      }
+      if (movie) {
+        onCreate(movie);
+        onClose();
+      }
+    } catch {
+      alert('Error al crear la película');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -37,22 +61,18 @@ const CrearPeliculaForm = ({ onCreate, onClose }) => {
       <form onSubmit={handleSubmit} className="bg-white dark:bg-gray-900 p-8 rounded-2xl shadow-2xl w-full max-w-md">
         <h2 className="text-2xl font-bold mb-6 text-center text-gray-900 dark:text-white">Crear Nueva Película</h2>
         <input name="title" value={form.title} onChange={handleChange} placeholder="Título" className="w-full mb-4 p-3 rounded-lg border border-gray-300 dark:border-gray-700 focus:ring-2 focus:ring-blue-400 text-gray-900 dark:text-white bg-gray-100 dark:bg-gray-800" required />
-        <select name="mainActor" value={form.mainActor} onChange={handleChange} className="w-full mb-4 p-3 rounded-lg border border-gray-300 dark:border-gray-700 focus:ring-2 focus:ring-blue-400 text-gray-900 dark:text-white bg-gray-100 dark:bg-gray-800" required>
+        <input name="genre" value={form.genre} onChange={handleChange} placeholder="Género" className="w-full mb-4 p-3 rounded-lg border border-gray-300 dark:border-gray-700 focus:ring-2 focus:ring-blue-400 text-gray-900 dark:text-white bg-gray-100 dark:bg-gray-800" required />
+        <input name="year" value={form.year} onChange={handleChange} placeholder="Año" className="w-full mb-4 p-3 rounded-lg border border-gray-300 dark:border-gray-700 focus:ring-2 focus:ring-blue-400 text-gray-900 dark:text-white bg-gray-100 dark:bg-gray-800" required />
+        <input type="file" name="photo" accept="image/*" onChange={handleChange} className="w-full mb-4 p-3 rounded-lg border border-gray-300 dark:border-gray-700 focus:ring-2 focus:ring-blue-400 text-gray-900 dark:text-white bg-gray-100 dark:bg-gray-800" />
+        <select name="actor_id" value={form.actor_id} onChange={handleChange} className="w-full mb-4 p-3 rounded-lg border border-gray-300 dark:border-gray-700 focus:ring-2 focus:ring-blue-400 text-gray-900 dark:text-white bg-gray-100 dark:bg-gray-800" required>
           <option value="">Selecciona actor principal</option>
-          {actoresFalsos.map(actor => (
-            <option key={actor.id} value={actor.name}>{actor.name}</option>
+          {actores.map(actor => (
+            <option key={actor.id} value={actor.id}>{actor.name}</option>
           ))}
         </select>
-        <input name="genre" value={form.genre} onChange={handleChange} placeholder="Género" className="w-full mb-2 p-2 border rounded" required />
-        <input name="imdbRating" value={form.imdbRating} onChange={handleChange} placeholder="IMDB Rating" className="w-full mb-2 p-2 border rounded" />
-        <input name="duration" value={form.duration} onChange={handleChange} placeholder="Duración (min)" className="w-full mb-2 p-2 border rounded" />
-        <input name="year" value={form.year} onChange={handleChange} placeholder="Año" className="w-full mb-2 p-2 border rounded" />
-        <input name="poster" value={form.poster} onChange={handleChange} placeholder="URL de la imagen" className="w-full mb-2 p-2 border rounded" />
-        <input name="cinema" value={form.cinema} onChange={handleChange} placeholder="Cine" className="w-full mb-2 p-2 border rounded" />
-        <input name="cinemaRating" value={form.cinemaRating} onChange={handleChange} placeholder="Rating del cine" className="w-full mb-2 p-2 border rounded" />
         <div className="flex justify-end space-x-2 mt-4">
           <button type="button" onClick={onClose} className="px-4 py-2 bg-gray-300 rounded">Cancelar</button>
-          <button type="submit" className="px-4 py-2 bg-blue-600 text-white rounded">Crear</button>
+          <button type="submit" className="px-4 py-2 bg-blue-600 text-white rounded" disabled={loading}>{loading ? 'Creando...' : 'Crear'}</button>
         </div>
       </form>
     </div>

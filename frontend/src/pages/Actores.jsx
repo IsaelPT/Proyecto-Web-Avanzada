@@ -1,15 +1,18 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import CrearActorForm from '../components/CrearActorForm';
-
-// Datos falsos iniciales
-const actorsInit = [
-  { id: 1, name: 'Actor 1', age: 35 },
-  { id: 2, name: 'Actor 2', age: 42 },
-];
+import { getActors } from '../helpers/gets';
 
 const Actores = () => {
-  const [actors, setActors] = useState(actorsInit);
+  const [actors, setActors] = useState([]);
   const [showForm, setShowForm] = useState(false);
+
+  useEffect(() => {
+    const fetchActors = async () => {
+      const data = await getActors();
+      setActors(data || []);
+    };
+    fetchActors();
+  }, []);
 
   const handleCreateActor = (actor) => {
     setActors([actor, ...actors]);

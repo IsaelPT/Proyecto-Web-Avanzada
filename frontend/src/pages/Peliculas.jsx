@@ -1,98 +1,49 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import MovieGrid from '../components/MovieGrid';
 import Hero from '../components/Hero';
 import CrearPeliculaForm from '../components/CrearPeliculaForm';
 import Filtrar from '../components/Filtrar';
-
-// Datos falsos para películas con imágenes reales de internet
-const moviesDataInit = [
-  {
-    id: 1,
-    title: 'Dune: Part Two',
-    mainActor: 'Timothée Chalamet',
-    genre: 'Sci-Fi',
-    imdbRating: '8.6',
-    duration: '166',
-    poster: '/images/dune_parte_dos-cartel-11648.jpg',
-    year: '2024',
-    genres: ['Sci-Fi', 'Adventure'],
-    cinema: 'IMAX',
-    cinemaRating: '9.1',
-  },
-  {
-    id: 2,
-    title: 'Godzilla x Kong: The New Empire',
-    mainActor: 'Rebecca Hall',
-    genre: 'Action',
-    imdbRating: '6.7',
-    duration: '115',
-    poster: '/images/godzilla_vs_kong-cartel-9765.jpg',
-    year: '2024',
-    genres: ['Action', 'Sci-Fi'],
-    cinema: 'Cinepolis',
-    cinemaRating: '7.8',
-  },
-  {
-    id: 3,
-    title: 'Kung Fu Panda 4',
-    mainActor: 'Jack Black',
-    genre: 'Animation',
-    imdbRating: '6.4',
-    duration: '94',
-    poster: '/images/kung_fu_panda_4-cartel-11645.jpg',
-    year: '2024',
-    genres: ['Animation', 'Comedy'],
-    cinema: 'Cinemex',
-    cinemaRating: '7.2',
-  },
-  {
-    id: 4,
-    title: 'Civil War',
-    mainActor: 'Kirsten Dunst',
-    genre: 'Thriller',
-    imdbRating: '7.4',
-    duration: '109',
-    poster: '/images/civil_war-cartel-11704.jpg',
-    year: '2024',
-    genres: ['Thriller', 'Action'],
-    cinema: 'Cinepolis',
-    cinemaRating: '8.0',
-  },
-  {
-    id: 5,
-    title: 'Cómo entrenar a tu dragón',
-    mainActor: 'Jay Baruchel',
-    genre: 'Animation',
-    imdbRating: '8.1',
-    duration: '98',
-    poster: '/images/como_entrenar_a_tu_dragon-cartel-12339.jpg',
-    year: '2010',
-    genres: ['Animation', 'Family'],
-    cinema: 'Cinemex',
-    cinemaRating: '8.5',
-  },
-];
+import { getMoviesActors } from '../helpers/gets';
+import { getMoviesActorsFiltered } from '../helpers/filter';
 
 const Peliculas = () => {
   // Estado para paginado, selección y formulario
-  const [movies, setMovies] = useState(moviesDataInit);
+  const [movies, setMovies] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
-  const [selectedMovie, setSelectedMovie] = useState(moviesDataInit[0] || null);
+  const [selectedMovie, setSelectedMovie] = useState(null);
   const [showForm, setShowForm] = useState(false);
   const [filter, setFilter] = useState("");
   const moviesPerPage = 10;
 
-  // Filtrado de películas
-  const filteredMovies = movies.filter(movie =>
-    movie.title.toLowerCase().includes(filter.toLowerCase()) ||
-    movie.genre.toLowerCase().includes(filter.toLowerCase()) ||
-    (movie.mainActor && movie.mainActor.toLowerCase().includes(filter.toLowerCase()))
-  );
+  // Inicializar moviesDataInit usando getMoviesActors
+  useEffect(() => {
+    const fetchMoviesActors = async () => {
+      const data = await getMoviesActors();
+      setMovies(data || []);
+      setSelectedMovie((data && data[0]) || null);
+    };
+    fetchMoviesActors();
+  }, []);
+
+  // Filtrado de películas usando la API
+  useEffect(() => {
+    const fetchFilteredMovies = async () => {
+      if (filter.trim() === "") {
+        const data = await getMoviesActors();
+        setMovies(data || []);
+      } else {
+        const filtered = await getMoviesActorsFiltered(filter);
+        setMovies(filtered || []);
+      }
+    };
+    fetchFilteredMovies();
+  }, [filter]);
+
   // Calcular paginado
   const indexOfLastMovie = currentPage * moviesPerPage;
   const indexOfFirstMovie = indexOfLastMovie - moviesPerPage;
-  const currentMovies = filteredMovies.slice(indexOfFirstMovie, indexOfLastMovie);
-  const totalPages = Math.ceil(filteredMovies.length / moviesPerPage);
+  const currentMovies = movies.slice(indexOfFirstMovie, indexOfLastMovie);
+  const totalPages = Math.ceil(movies.length / moviesPerPage);
 
   // Navegación Hero
   const handlePrev = () => {

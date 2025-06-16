@@ -1,17 +1,29 @@
 import React, { useState } from 'react';
+import { createActor } from '../helpers/posts';
 
 const CrearActorForm = ({ onCreate, onClose }) => {
   const [form, setForm] = useState({ name: '', age: '' });
+  const [loading, setLoading] = useState(false);
 
   const handleChange = e => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = e => {
+  const handleSubmit = async e => {
     e.preventDefault();
-    if (form.name && form.age) {
-      onCreate({ ...form, id: Date.now() });
-      onClose();
+    setLoading(true);
+    try {
+      if (form.name && form.age) {
+        const actor = await createActor(form);
+        if (actor) {
+          onCreate(actor);
+          onClose();
+        } else {
+          alert('Error al crear el actor');
+        }
+      }
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -23,7 +35,7 @@ const CrearActorForm = ({ onCreate, onClose }) => {
         <input name="age" value={form.age} onChange={handleChange} placeholder="Edad" type="number" className="w-full mb-4 p-3 rounded-lg border border-gray-300 dark:border-gray-700 focus:ring-2 focus:ring-blue-400 text-gray-900 dark:text-white bg-gray-100 dark:bg-gray-800" required />
         <div className="flex justify-end space-x-3 mt-6">
           <button type="button" onClick={onClose} className="px-5 py-2 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-white rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600">Cancelar</button>
-          <button type="submit" className="px-5 py-2 bg-blue-600 text-white font-bold rounded-lg hover:bg-blue-700">Agregar</button>
+          <button type="submit" className="px-5 py-2 bg-blue-600 text-white font-bold rounded-lg hover:bg-blue-700" disabled={loading}>{loading ? 'Agregando...' : 'Agregar'}</button>
         </div>
       </form>
     </div>

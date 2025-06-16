@@ -16,6 +16,8 @@ return new class extends Migration
             $table->string('title');
             $table->string("genre")->nullable();
             $table->integer('year')->nullable();
+            $table->string('photo_path')->nullable(); // Ruta de la foto
+            $table->string('photo_name')->nullable(); // Nombre de la foto
             $table->timestamps();
         });
     }
