@@ -1,14 +1,22 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { updateMovie } from '../helpers/movieActions';
+import { getActors } from '../helpers/gets';
+import { updateMovieActor } from '../helpers/movieActorActions';
 
 const EditarPeliculaForm = ({ movie, movieActors, onUpdate, onClose }) => {
   const [form, setForm] = useState({
     title: movie.movie_title,
     year: movie.movie_year,
     genre: movie.movie_genre,
-    photo_path: movie.movie_photo_path
+    photo_path: movie.movie_photo_path,
+    actor_id: movie.actor_id // actor actual
   });
   const [loading, setLoading] = useState(false);
+  const [actores, setActores] = useState([]);
+
+  useEffect(() => {
+    getActors().then(data => setActores(data || []));
+  }, []);
 
   const handleChange = e => {
     const { name, value, files } = e.target;
@@ -23,8 +31,8 @@ const EditarPeliculaForm = ({ movie, movieActors, onUpdate, onClose }) => {
     e.preventDefault();
     setLoading(true);
     try {
-      const movieId = movie.movie_id || movie.id; // Asegurarse de usar el ID correcto
-      // Construir FormData para enviar imagen
+      const movieId = movie.movie_id || movie.id;
+      // Actualizar película (datos y foto)
       const movieFormData = new FormData();
       movieFormData.append('title', form.title);
       movieFormData.append('year', form.year);
@@ -33,9 +41,13 @@ const EditarPeliculaForm = ({ movie, movieActors, onUpdate, onClose }) => {
         movieFormData.append('photo', form.photo);
       }
       const updated = await updateMovie(movieId, movieFormData);
+      // Actualizar actor en movie_actor si cambió
+      if (form.actor_id && form.actor_id !== movie.actor_id) {
+        await updateMovieActor(movie.id, { actor_id: form.actor_id });
+      }
       if (updated) {
         const updatedMovieActor = movieActors?.find(ma => ma.movie_id === movieId) || movie;
-        onUpdate({ ...updatedMovieActor, ...updated });
+        onUpdate({ ...updatedMovieActor, ...updated, actor_id: form.actor_id });
         onClose();
       } else {
         alert('Error al actualizar la película');
@@ -51,6 +63,12 @@ const EditarPeliculaForm = ({ movie, movieActors, onUpdate, onClose }) => {
       <input name="title" value={form.title} onChange={handleChange} placeholder="Título" className="w-full mb-4 p-3 rounded-lg border border-gray-300 dark:border-gray-700 focus:ring-2 focus:ring-blue-400 text-gray-900 dark:text-white bg-gray-100 dark:bg-gray-800" required />
       <input name="year" value={form.year} onChange={handleChange} placeholder="Año" type="number" className="w-full mb-4 p-3 rounded-lg border border-gray-300 dark:border-gray-700 focus:ring-2 focus:ring-blue-400 text-gray-900 dark:text-white bg-gray-100 dark:bg-gray-800" required />
       <input name="genre" value={form.genre} onChange={handleChange} placeholder="Género" className="w-full mb-4 p-3 rounded-lg border border-gray-300 dark:border-gray-700 focus:ring-2 focus:ring-blue-400 text-gray-900 dark:text-white bg-gray-100 dark:bg-gray-800" required />
+      <select name="actor_id" value={form.actor_id} onChange={handleChange} className="w-full mb-4 p-3 rounded-lg border border-gray-300 dark:border-gray-700 focus:ring-2 focus:ring-blue-400 text-gray-900 dark:text-white bg-gray-100 dark:bg-gray-800">
+        <option value="">Selecciona un actor</option>
+        {actores.map(actor => (
+          <option key={actor.id} value={actor.id}>{actor.name}</option>
+        ))}
+      </select>
       <input name="photo" type="file" accept="image/*" onChange={handleChange} className="w-full mb-4 p-3 rounded-lg border border-gray-300 dark:border-gray-700 bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white" />
       <div className="flex justify-end space-x-3 mt-6">
         <button type="button" onClick={onClose} className="px-5 py-2 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-white rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600">Cancelar</button>

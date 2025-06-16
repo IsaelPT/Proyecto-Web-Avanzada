@@ -17,6 +17,8 @@ class MovieActorController extends Controller
                 ->join('actors', 'movies_actors.actor_id', '=', 'actors.id')
                 ->select(
                     'movies_actors.id',
+                    'movies_actors.movie_id',
+                    'movies_actors.actor_id',
                     'movies.title as movie_title',
                     'movies.genre as movie_genre',
                     'movies.year as movie_year',
@@ -40,6 +42,8 @@ class MovieActorController extends Controller
                 ->where('movies_actors.id', $id)
                 ->select(
                     'movies_actors.id',
+                    'movies_actors.movie_id',
+                    'movies_actors.actor_id',
                     'movies.title as movie_title',
                     'movies.genre as movie_genre',
                     'movies.year as movie_year',
@@ -61,8 +65,8 @@ class MovieActorController extends Controller
     public function store(Request $request){
         try {
             $validated = $request->validate([
-                "movie_id"=> "required|integer",
-                "actor_id" => "required|integer",
+                "movie_id"=> "sometimes|integer",
+                "actor_id" => "sometimes|integer",
             ]);
             $product = MoviesActor::create($validated);
             return response()->json($product, 201);
@@ -75,8 +79,8 @@ class MovieActorController extends Controller
         try {
             $movieactor = MoviesActor::findOrFail($id);
             $validated = $request->validate([
-                "movie_id"=> "required|integer",
-                "actor_id" => "required|integer",
+                "movie_id"=> "sometimes|integer",
+                "actor_id" => "sometimes|integer",
             ]);
             $movieactor->update($validated);
             return response()->json($movieactor, 200);

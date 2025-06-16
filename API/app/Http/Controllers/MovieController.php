@@ -61,20 +61,22 @@ class MovieController extends Controller
                 "photo" => "nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048"
             ]);
 
+            // Si se envía una nueva imagen, eliminar la anterior y guardar la nueva
             if ($request->hasFile('photo')) {
-                // Eliminar foto anterior si existe
                 if ($movie->photo_name) {
                     Storage::disk('public')->delete('movies/'.$movie->photo_name);
                 }
                 $file = $request->file('photo');
                 $photoName = time().'_'.$file->getClientOriginalName();
-                $photoPath = $file->storeAs('movies', $photoName, 'public');
-                // Guardar la ruta relativa para XAMPP
+                $file->storeAs('movies', $photoName, 'public');
                 $validated['photo_path'] = '/API/public/storage/movies/' . $photoName;
                 $validated['photo_name'] = $photoName;
             }
 
-            $movie->update($validated);
+            // Actualizar solo los campos enviados
+            $movie->fill($validated);
+            $movie->save();
+            $movie->refresh();
             return response()->json($movie, 200);
         } catch (Exception $e) {
             return response()->json(['error' => 'No se pudo actualizar la película.'], 500);
