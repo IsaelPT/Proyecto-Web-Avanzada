@@ -10,13 +10,15 @@ import './index.css';
 const App = () => {
   return (
     <Router>
-      <div className="min-h-screen bg-gray-50">
+      <div className="flex flex-col min-h-screen bg-gray-50">
         <Header />
-        <Routes>
-          <Route path="/" element={<Navigate to="/peliculas" />} />
-          <Route path="/peliculas" element={<><Hero /><Peliculas /></>} />
-          <Route path="/actores" element={<Actores />} />
-        </Routes>
+        <div className="flex-1 flex flex-col">
+          <Routes>
+            <Route path="/" element={<Navigate to="/peliculas" />} />
+            <Route path="/peliculas" element={<><Hero /><Peliculas /></>} />
+            <Route path="/actores" element={<Actores />} />
+          </Routes>
+        </div>
         <Footer />
       </div>
     </Router>
